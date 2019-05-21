@@ -123,6 +123,16 @@ public:
 	 BoolExp *_right; // right operand
 };
 
+class Fand : public BoolExp {
+public:
+     Fand (BoolExp *left, BoolExp *right) { _left = left; _right = right; }
+	 void genBoolExp (int truelabel, int falselabel); // override
+	 
+	 BoolExp *_left; // left operand
+	 BoolExp *_right; // right operand
+};
+
+
 
 class Not : public BoolExp {
 public:
@@ -189,6 +199,26 @@ public:
 	 Stmt *_body;
 };
 
+class ForStmt : public Stmt 
+{
+   public :
+	
+   AssignStmt  * _init ;
+   BoolExp  * _boolExp;
+   AssignStmt  * _inc;
+   Stmt  * _body;
+ 
+   ForStmt(AssignStmt * init,BoolExp * boolexp,AssignStmt * increment, Stmt *body) : Stmt ()
+   {
+	this._init = init;
+	this._boolExp = boolexp;
+	this._inc = increment;
+	this._body = body;
+
+   }
+   void genStmt (); // override
+
+}
 //  a block contains a list of statements. For now -- no declarations in a block
 class Block: public Stmt {
 public:
@@ -226,7 +256,14 @@ public:
 
 class SwitchStmt : public Stmt {
 public:
-      SwitchStmt (Exp *exp, Case *caselist, Stmt *default_stmt, int line);
+      SwitchStmt (Exp *exp, Case *caselist, Stmt *default_stmt, int line):Stmt() {
+
+		this._exp = exp;
+		this._caselist = caselist;
+		this._default_stmt = default_stmt;
+		this._line = line;
+
+	  }
 	  		   
 	  void genStmt (); // override
 	  

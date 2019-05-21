@@ -14,6 +14,19 @@
 static	  
 std::stack<int> exitlabels;
 
+
+static
+void push (int label)
+{
+   exitlabels.push(label);
+} 
+
+static
+void pop()
+{
+   exitlabels.pop();
+} 
+
 static
 int newTemp ()
 {
@@ -156,6 +169,39 @@ void SimpleBoolExp::genBoolExp (int truelabel, int falselabel)
 	}
 }
 
+void Fand::genBoolExp(int truelabel, int falselabel)
+{
+ if (truelabel == FALL_THROUGH && falselabel == FALL_THROUGH)
+	    return; // no need for code 
+
+    if  (truelabel == FALL_THROUGH) {
+	    int next_label = newlabel(); // FALL_THROUGH implemented by jumping to next_label
+	    _left->genBoolExp (next_label, // if left operand is true then the OR expression
+		                               //is true so jump to next_label (thus falling through
+									   // to the code following the code for the OR expression)
+		                   FALL_THROUGH); // if left operand is false then 
+						                  // fall through and evaluate right operand   
+		_right->genBoolExp (FALL_THROUGH, falselabel);
+        emitlabel (next_label);
+    }  else if (falselabel == FALL_THROUGH) {
+       _left->genBoolExp (truelabel, // if left operand is true then the OR expresson is true 
+	                                 // so jump to  truelabel (without evaluating right operand)
+                          FALL_THROUGH); // if left operand is false then 
+						                  // fall through and evaluate right operand
+	   _right->genBoolExp (truelabel, FALL_THROUGH);
+	} else { // no fall through
+	   _left->genBoolExp (truelabel, // if left operand is true then the or expresson is true 
+	                                 // so jump to  truelabel (without evaluating right operand)
+						  FALL_THROUGH); // if left operand is false then 
+						                  // fall through and evaluate right operand
+	   _right->genBoolExp (truelabel, falselabel);
+	}
+
+
+
+}
+
+
 void Or::genBoolExp (int truelabel, int falselabel)
 {
     if (truelabel == FALL_THROUGH && falselabel == FALL_THROUGH)
@@ -263,13 +309,37 @@ void WhileStmt::genStmt()
 	_condition->genBoolExp (FALL_THROUGH, exitlabel);
 	
 	
-	
 	_body->genStmt ();
 	
 	
 	emit ("goto label%d\n", condlabel);
 	emitlabel(exitlabel);
 }
+
+void ForStmt::genStmt()
+{
+
+	int condlabel = newlabel();
+	int bodylabel = newlabel();
+	int exitlabel = newlabel();
+
+	push(exitlabel);
+
+	_init->genStmt();
+	emit("goto label%d\n", condlabel);
+	emitlabel(bodylabel);
+	_body->genStmt();
+	_inc->genStmt();
+
+	emitlabel(condlabel);
+	__boolExp->genBoolExp(bodylabel, FALL_THROUGH);
+	emitlabel(exitlabel);
+
+	pop();
+
+
+}
+
 
 void Block::genStmt()
 {
@@ -279,12 +349,86 @@ void Block::genStmt()
 
 void SwitchStmt::genStmt()
 { 
-    /* not implemented yet; */
+		/*
+		this._exp = exp;
+		this._caselist = caselist;
+		this._default_stmt = default_stmt;
+		this._line = line;
+
+		*/ 
+		 int defaultlabel = newlabel ();
+		 int exitlabel = newlabel ();
+		 int condlabel = newlabel ();
+
+
+		if(_exp->genExp() == _INT)
+		{
+
+				Case * ptr = _caselist;
+
+				while(ptr != NULL)
+				{	
+					ptr->_label = new newlabel();
+
+					emitlabel(ptr->_label);
+					ptr->genStmt();
+
+					if(ptr->_hasBreak)
+					{
+						emit ("goto label%d\n", exitlabel);
+					}
+
+
+					ptr = ptr->_next;
+				}
+
+				emit ("goto label%d\n",defaultlabel);
+
+				_default_stmt.genStmt();
+
+				
+				emit ("label%d\n",condlabel); // label 1
+
+				Case * case_ptr = _caselist;
+
+					while(case_ptr != NULL)
+					{	
+
+					   emit("case _t%d %d label %d \n",_exp->genExp(),case_ptr->_number,case_ptr->_label);
+
+						case_ptr = case_ptr->_next;
+					}
+				
+				emit("case _t%d %d label %d \n",_exp->genExp(),_exp->genExp(),defaultlabel);
+
+
+				emitlabel(exitlabel);
+				pop();
+				
+		}
+		else
+		{
+			  errorMsg("Switch compiler error , value is not int \n");
+
+		}
+
+
 }
 
 void BreakStmt::genStmt()
 {
-	/* not implemented yet; */	
+	
+	if(!exitlabels.empty())
+	{
+		emit ("goto label%d\n", exitlabels.top());
+
+	}
+	else
+	{
+		errorMsg("break compiler error #5 on line %d \n",_line);
+
+	}
+
 }
 
 
