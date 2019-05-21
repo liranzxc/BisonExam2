@@ -26,6 +26,9 @@ extern int atoi (const char *);
 "-"        { yylval.op = MINUS; return ADDOP;}
 "*"        { yylval.op = MUL; return MULOP; }
 "/"        { yylval.op = DIV; return MULOP;}
+"%"        { yylval.op = MOD; return MULOP;}
+
+
 
 "<"        { yylval.op = LT; return RELOP; }
 ">"        { yylval.op = GT; return RELOP; }

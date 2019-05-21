@@ -175,26 +175,28 @@ void Fand::genBoolExp(int truelabel, int falselabel)
 	    return; // no need for code 
 
     if  (truelabel == FALL_THROUGH) {
-	    int next_label = newlabel(); // FALL_THROUGH implemented by jumping to next_label
-	    _left->genBoolExp (next_label, // if left operand is true then the OR expression
-		                               //is true so jump to next_label (thus falling through
-									   // to the code following the code for the OR expression)
-		                   FALL_THROUGH); // if left operand is false then 
+	    _left->genBoolExp (falselabel, FALL_THROUGH); // if left operand is false then 
 						                  // fall through and evaluate right operand   
-		_right->genBoolExp (FALL_THROUGH, falselabel);
-        emitlabel (next_label);
+		_right->genBoolExp (falselabel, FALL_THROUGH);
+        
     }  else if (falselabel == FALL_THROUGH) {
-       _left->genBoolExp (truelabel, // if left operand is true then the OR expresson is true 
+
+		int next_label = newlabel(); // FALL_THROUGH implemented by jumping to next_label
+
+       _left->genBoolExp (next_label, // if left operand is true then the OR expresson is true 
 	                                 // so jump to  truelabel (without evaluating right operand)
                           FALL_THROUGH); // if left operand is false then 
 						                  // fall through and evaluate right operand
-	   _right->genBoolExp (truelabel, FALL_THROUGH);
+	   _right->genBoolExp (next_label, truelabel);
+
+	   emitlabel (next_label);
+
 	} else { // no fall through
-	   _left->genBoolExp (truelabel, // if left operand is true then the or expresson is true 
+	   _left->genBoolExp (falselabel, // if left operand is true then the or expresson is true 
 	                                 // so jump to  truelabel (without evaluating right operand)
 						  FALL_THROUGH); // if left operand is false then 
 						                  // fall through and evaluate right operand
-	   _right->genBoolExp (truelabel, falselabel);
+	   _right->genBoolExp (falselabel,truelabel);
 	}
 
 
