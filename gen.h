@@ -10,6 +10,7 @@ void errorMsg (const char *format, ...);
 enum myType { _INT, _FLOAT, UNKNOWN };
 enum op { PLUS = 0, MINUS, MUL, DIV,MOD, LT, GT, LE, GE, EQ, NE };
 
+
 /* convert operator  to  string  suitable for the given type
   e.g  opName (PLUS, _INT)  returns "+"
        opName (PLUS, _FLOAT) returns  "plus"

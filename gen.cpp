@@ -333,9 +333,8 @@ void ForStmt::genStmt()
 	emitlabel(bodylabel);
 	_body->genStmt();
 	_inc->genStmt();
-
 	emitlabel(condlabel);
-	__boolExp->genBoolExp(bodylabel, FALL_THROUGH);
+	_boolExp->genBoolExp(bodylabel, FALL_THROUGH);
 	emitlabel(exitlabel);
 
 	pop();
@@ -374,7 +373,7 @@ void SwitchStmt::genStmt()
 					ptr->_label = new newlabel();
 
 					emitlabel(ptr->_label);
-					ptr->genStmt();
+					ptr->_stmt->genStmt();
 
 					if(ptr->_hasBreak)
 					{
@@ -387,7 +386,7 @@ void SwitchStmt::genStmt()
 
 				emit ("goto label%d\n",defaultlabel);
 
-				_default_stmt.genStmt();
+				_default_stmt->genStmt();
 
 				
 				emit ("label%d\n",condlabel); // label 1

@@ -5,6 +5,11 @@
 
 #include "gen.h"
 
+
+
+enum myType { _INT, _FLOAT, UNKNOWN };
+enum op { PLUS = 0, MINUS, MUL, DIV,MOD, LT, GT, LE, GE, EQ, NE };
+
 /*
 enum myType { _INT, _FLOAT, UNKNOWN };
 enum op { PLUS = 0, MINUS, MUL, DIV, LT, GT, LE, GE, EQ, NE };
@@ -199,26 +204,25 @@ public:
 	 Stmt *_body;
 };
 
-class ForStmt : public Stmt 
-{
-   public :
+class ForStmt : public Stmt {
+public:
 	
    AssignStmt  * _init ;
    BoolExp  * _boolExp;
    AssignStmt  * _inc;
    Stmt  * _body;
  
-   ForStmt(AssignStmt * init,BoolExp * boolexp,AssignStmt * increment, Stmt *body) : Stmt ()
+   ForStmt(AssignStmt * init,BoolExp * boolexp,AssignStmt * increment, Stmt *body)
    {
-	this._init = init;
-	this._boolExp = boolexp;
-	this._inc = increment;
-	this._body = body;
+	this->_init = init;
+	this->_boolExp = boolexp;
+	this->_inc = increment;
+	this->_body = body;
 
    }
    void genStmt (); // override
 
-}
+};
 //  a block contains a list of statements. For now -- no declarations in a block
 class Block: public Stmt {
 public:
@@ -244,24 +248,23 @@ public:
           _stmt = stmt;
 		  _hasBreak = hasBreak;
           _next = NULL;
-          /*_label = -1; */ // will be set when code is generated
+          _label = -1; 
       }
 
       int _number;
 	  Stmt *_stmt;
 	  bool _hasBreak; 
 	  Case *_next;
-      /* int _label; */ 
+       int _label;  
 };
 
 class SwitchStmt : public Stmt {
 public:
-      SwitchStmt (Exp *exp, Case *caselist, Stmt *default_stmt, int line):Stmt() {
-
-		this._exp = exp;
-		this._caselist = caselist;
-		this._default_stmt = default_stmt;
-		this._line = line;
+      SwitchStmt (Exp *exp, Case *caselist, Stmt *default_stmt, int line) {
+		this->_exp = exp;
+		this->_caselist = caselist;
+		this->_default_stmt = default_stmt;
+		this->_line = line;
 
 	  }
 	  		   

@@ -1,6 +1,6 @@
 %code {
 #include <stdio.h>
-#include <string>
+#include <string.h>
 #include <stdarg.h>
 #include "symtab.h"
 
