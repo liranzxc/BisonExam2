@@ -85,7 +85,7 @@ opNames [] = { {"+", "@+"},
 const char *
 opName (enum op op, myType t)
 {
-    if (op > DIV) { fprintf (stderr, "internal compiler error #1"); exit (1); }
+    if (op > MOD) { fprintf (stderr, "internal compiler error #1"); exit (1); }
     if (t == _INT)
 	    return opNames [op].int_name;
 	else
@@ -96,6 +96,7 @@ int BinaryOp::genExp ()
 {
     if (_left->_type != _right->_type)
       return -1;
+	  // casting 
 	 	
 	int left_operand_result = _left->genExp ();
 	int right_operand_result = _right->genExp ();
